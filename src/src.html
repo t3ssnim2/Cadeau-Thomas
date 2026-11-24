@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accès au cadeau – Vérification en cours</title>
+<style>
+  :root{--bg:#0f1020;--card:#1b1d3a;--ink:#f4f4ff;--muted:#9a9cc8;--red:#ff4d5e;--green:#3ddc84;--yellow:#ffd23f;--blue:#4d7cff;--line:#2e3170}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  body{min-height:100vh;padding:112px 14px 90px;background:radial-gradient(circle at 20% 10%,#23265a 0,transparent 40%),radial-gradient(circle at 90% 90%,#3a1a4a 0,transparent 40%),var(--bg);
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  input,textarea,select{-webkit-user-select:text;user-select:text}
+  body.fc,body.fc *{cursor:none!important}
+  body.noscroll{scrollbar-width:none}body.noscroll::-webkit-scrollbar{display:none}
+  p{color:var(--muted);line-height:1.5;margin:8px 0}
+  h1{font-size:1.3rem;margin:0 0 6px}
+  button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:11px 16px;font-weight:700;color:#fff;background:var(--blue)}
+  button:active{transform:scale(.97)}button[disabled]{opacity:.35;cursor:not-allowed}
+  .big{width:100%;font-size:1.02rem;background:var(--green);color:#06210f;margin-top:12px}
+  .sm{padding:5px 10px;font-size:.8rem}
+  .card{width:100%;max-width:520px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px 20px;box-shadow:0 20px 60px #0008;animation:in .35s ease}
+  @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .badge{display:inline-block;font-size:.7rem;background:var(--line);border-radius:99px;padding:3px 10px;color:var(--muted);margin-bottom:10px}
+  .msg{min-height:1.3em;color:var(--red);font-weight:600;margin-top:8px}
+  .ok{color:var(--green)}
+  input[type=text],input[type=number],input[type=password],input[type=email],select,textarea{width:100%;font:inherit;padding:11px;border-radius:12px;border:2px solid var(--line);background:#0d0e22;color:var(--ink);margin:4px 0}
+  label.f{display:block;font-size:.8rem;color:var(--muted);margin-top:8px}
+  .scrollbox{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:#0d0e22;margin:10px 0;-webkit-user-select:none}
+  .row{display:block;padding:5px 0;font-size:.88rem;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+  .tile{aspect-ratio:1;font-size:2.2rem;display:flex;align-items:center;justify-content:center;background:#0d0e22;border:2px solid var(--line);border-radius:12px;cursor:pointer}
+  .tile.sel{border-color:var(--yellow);background:#2b2a12}
+  .bar{height:22px;border-radius:99px;background:#0d0e22;overflow:hidden;margin:14px 0 6px;border:1px solid var(--line)}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--green))}
+  .bar2{background:#3a2d00;color:var(--yellow);border-radius:10px;padding:8px 10px;font-size:.85rem;margin-bottom:10px}
+  .shake{animation:shake .4s}@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  /* header */
+  #hd{position:fixed;top:0;left:0;right:0;z-index:60;background:#0b0c1ad9;backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:6px 10px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:.74rem;color:var(--muted)}
+  #hd .sp{flex:1}
+  #hd button{padding:4px 9px;font-size:.72rem;background:var(--line)}
+  #giveup{background:#5a1e28!important}
+  #crumb{position:fixed;top:58px;left:0;right:0;z-index:59;font-size:.68rem;color:#6c6fa0;padding:2px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #crumb b{color:var(--ink)}
+  #foot{position:fixed;bottom:0;left:0;right:0;z-index:58;background:#0b0c1ad9;border-top:1px solid var(--line);padding:6px 12px;font-size:.72rem;color:var(--muted);text-align:center;min-height:28px}
+  #toasts{position:fixed;top:92px;right:10px;z-index:200;display:flex;flex-direction:column;gap:6px;max-width:min(320px,86vw);pointer-events:none}
+  .toast{background:#262a5c;border:1px solid #444a9c;border-radius:12px;padding:9px 12px;font-size:.82rem;animation:in .3s}
+  .toast.bad{background:#4a1822;border-color:#8c2c3d}.toast.gold{background:#3a3000;border-color:#8c7a1c;color:var(--yellow)}.toast.prize{background:#173a22;border-color:#2c8c4d}
+  .ov{position:fixed;inset:0;background:#000b;z-index:150;display:flex;align-items:center;justify-content:center;padding:16px}
+  .mod{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;max-width:420px;width:100%;position:relative}
+  .mod .x{position:absolute;top:8px;right:10px;background:none;color:#6c6fa0;padding:2px 6px}
+  #cookiebar{position:fixed;left:8px;right:8px;bottom:42px;z-index:120;background:#2a2d63;border:1px solid #5b61c9;border-radius:14px;padding:10px 40px 10px 12px;font-size:.8rem}
+  #cookiebar .cx{position:absolute;top:2px;right:4px;background:none;font-size:.5rem;padding:2px 3px;color:#7f83c9}
+  /* chat */
+  #chatbtn{position:fixed;right:12px;bottom:46px;z-index:130;border-radius:99px;width:48px;height:48px;font-size:1.3rem;padding:0;background:var(--blue)}
+  #chat{position:fixed;right:12px;bottom:104px;z-index:131;width:min(300px,88vw);background:var(--card);border:1px solid var(--line);border-radius:14px;display:none;flex-direction:column;overflow:hidden}
+  #chat.on{display:flex}#chatlog{height:190px;overflow:auto;padding:8px;font-size:.8rem}
+  #chatlog div{margin:4px 0;padding:6px 8px;border-radius:10px;background:#262a5c;max-width:90%}#chatlog .me{background:#1f4d3a;margin-left:auto}
+  #fcur{position:fixed;z-index:300;font-size:1.4rem;pointer-events:none;display:none}
+  body.fc #fcur{display:block}
+  #fake{position:fixed;inset:0;z-index:400;background:#7a0010;color:#fff;display:none;align-items:center;justify-content:center;text-align:center;padding:20px;font-family:monospace}
+  canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:500}
+  /* misc */
+  .tiny{background:none;color:#5c5f90;font-size:.55rem;padding:2px;font-weight:400;text-decoration:underline}
+  .sw{width:70px;height:34px;border-radius:99px;background:#0d0e22;border:2px solid var(--line);position:relative;cursor:pointer;display:block}
+  .sw i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--muted);transition:left .25s}
+  .stats{background:#0d0e22;border-radius:14px;padding:12px 16px;margin:16px 0;font-size:.92rem}
+  .stats div{display:flex;justify-content:space-between;padding:3px 0;color:var(--muted)}.stats b{color:var(--ink)}
+  .gift{font-size:4rem;text-align:center;animation:bounce 1s infinite}@keyframes bounce{50%{transform:translateY(-10px)}}
+  .cert{border:4px double var(--yellow);border-radius:10px;padding:18px;text-align:center;background:#1d1a05}
+  table.lb{width:100%;border-collapse:collapse;font-size:.9rem}table.lb td{padding:6px 4px;border-bottom:1px solid var(--line)}
+  .tall{position:relative}.tall .mark{position:absolute;left:0;right:0;text-align:center;color:#3b3e78;font-size:.9rem}
+  #fscroll{position:fixed;right:2px;top:110px;bottom:60px;width:8px;background:#0d0e22;border-radius:6px;z-index:70;display:none}
+  #fscroll i{position:absolute;left:0;right:0;height:40px;background:var(--blue);border-radius:6px}
+  #uptop{position:fixed;left:10px;bottom:46px;z-index:70;display:none;background:var(--line)}
+  /* mascotte */
+  #mascot{position:fixed;z-index:140;left:20px;top:200px;width:76px;height:86px;pointer-events:none;transition:left 3.2s ease-in-out,top 3.2s ease-in-out}
+  #mascot svg{width:100%;height:100%;overflow:visible;animation:mbob 1.4s ease-in-out infinite}
+  #mascot.flip svg{transform:scaleX(-1);animation:none}
+  #mascot.dance svg{animation:mdance .5s ease-in-out infinite}
+  @keyframes mbob{50%{transform:translateY(-5px)}}
+  @keyframes mdance{0%{transform:rotate(-14deg) translateY(0)}25%{transform:rotate(0) translateY(-14px)}50%{transform:rotate(14deg) translateY(0)}75%{transform:rotate(0) translateY(-14px)}100%{transform:rotate(-14deg) translateY(0)}}
+  #mbub{position:absolute;bottom:92px;left:50%;transform:translateX(-50%) scale(.8);width:190px;background:#fff;color:#14152e;border-radius:14px;padding:8px 10px;font-size:.78rem;font-weight:600;line-height:1.3;opacity:0;transition:.2s;text-align:center;box-shadow:0 6px 20px #0006}
+  #mbub:after{content:"";position:absolute;top:100%;left:50%;margin-left:-7px;border:7px solid transparent;border-top-color:#fff}
+  #mbub.on{opacity:1;transform:translateX(-50%) scale(1)}
+  #mnote{position:absolute;top:-6px;right:-10px;font-size:1.2rem;display:none}
+  #mascot.dance #mnote{display:block;animation:mbob .5s infinite}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(circle at 50% 125%,rgba(255,70,0,calc(.5*var(--heat,0))),transparent 62%),radial-gradient(circle at 50% -15%,rgba(150,0,0,calc(.4*var(--heat,0))),transparent 52%);transition:background .6s}
+  .toast.devil{background:#3b0a0a;border-color:#a01818;color:#ffb4a8}
+  body.calm #mascot .horn{display:none}
+</style>
+</head>
+<body>
+<header id="hd">
+  <span id="rage"></span><span id="prog"></span><span class="sp"></span>
+  <span id="clock"></span><span id="view"></span>
+  <button id="burger">☰</button><button id="giveup">J'abandonne</button>
+</header>
+<div id="crumb"></div>
+<div id="toasts"></div>
+<main id="stage"></main>
+<div id="foot"></div>
+<button id="chatbtn" title="Assistance">💬</button>
+<div id="chat"><div id="chatlog"></div><input type="text" id="chatin" placeholder="Écrivez à Tess…" style="margin:0;border-radius:0;border-width:1px 0 0 0"></div>
+<div id="fcur">👆</div>
+<div id="fscroll"><i></i></div>
+<button id="uptop">⬆ Remonter</button>
+<div id="fake"><div><h1 style="font-size:2rem">ERREUR 404</h1><p style="color:#fff">cadeau_introuvable.exe a cessé de fonctionner.</p><p style="color:#ffd" id="fakeLine">Suppression du cadeau en cours…</p></div></div>
+<div id="mascot" data-x="20"><div id="mbub"></div><span id="mnote">🎵</span>
+<svg viewBox="0 0 80 90"><defs><radialGradient id="mg" cx="35%" cy="30%"><stop offset="0" stop-color="#c58bff"/><stop offset="1" stop-color="#6a3fd8"/></radialGradient></defs>
+<ellipse cx="40" cy="86" rx="22" ry="4" fill="#0006"/>
+<path d="M12 40 Q4 52 10 62" stroke="#6a3fd8" stroke-width="6" stroke-linecap="round" fill="none"><animate attributeName="d" dur=".6s" repeatCount="indefinite" values="M12 40 Q4 52 10 62;M12 40 Q2 30 8 22;M12 40 Q4 52 10 62"/></path>
+<path d="M68 40 Q76 52 70 62" stroke="#6a3fd8" stroke-width="6" stroke-linecap="round" fill="none"><animate attributeName="d" dur=".6s" begin=".3s" repeatCount="indefinite" values="M68 40 Q76 52 70 62;M68 40 Q78 30 72 22;M68 40 Q76 52 70 62"/></path>
+<rect x="26" y="68" width="8" height="14" rx="4" fill="#4b2aa8"/><rect x="46" y="68" width="8" height="14" rx="4" fill="#4b2aa8"/>
+<path class="horn" d="M16 24 L10 4 L30 16Z" fill="#ff3b3b"/><path class="horn" d="M64 24 L70 4 L50 16Z" fill="#ff3b3b"/><path class="horn" d="M62 78 Q80 82 76 66 L72 70 Q72 76 62 74Z" fill="#ff3b3b"/><ellipse cx="40" cy="42" rx="28" ry="30" fill="url(#mg)"/>
+<ellipse cx="30" cy="38" rx="8" ry="9" fill="#fff"/><ellipse cx="50" cy="38" rx="8" ry="9" fill="#fff"/>
+<circle cx="32" cy="40" r="4" fill="#14152e"/><circle cx="52" cy="40" r="4" fill="#14152e"/>
+<path d="M20 27 L38 31" stroke="#14152e" stroke-width="3" stroke-linecap="round"/><path d="M60 27 L44 33" stroke="#14152e" stroke-width="3" stroke-linecap="round"/>
+<path d="M28 56 Q42 66 54 54" stroke="#14152e" stroke-width="3" stroke-linecap="round" fill="none"/></svg></div>
+<canvas id="cf"></canvas>
+
+<script>
+(()=>{
+"use strict";
+/* ================= CONFIG ================= */
+const CFG={NAME:"Thomas",FULL:"Thomas Besse",AGE:26,
+  FINAL_B64:"__FINAL__",
+  SECRET_HASH:__HASH__,
+  WAIT:1   // multiplicateur des temps d'attente
+};
+/* ============== OUTILS ============== */
+const $=(s,r=document)=>r.querySelector(s);
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in (attrs||{})){const v=attrs[k];if(k==='class')e.className=v;else if(k==='style')e.style.cssText=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k==='html')e.innerHTML=v;else e.setAttribute(k,v)}kids.flat().forEach(c=>{if(c!=null)e.append(c instanceof Node?c:document.createTextNode(c))});return e}
+const rnd=(a,b)=>a+Math.random()*(b-a),ri=(a,b)=>Math.floor(rnd(a,b+1)),pick=a=>a[ri(0,a.length-1)];
+const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const hash=s=>{let x=5381;for(const c of s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim())x=((x<<5)+x+c.charCodeAt(0))>>>0;return x};
+const fmt=ms=>{const s=Math.round(ms/1000);return Math.floor(s/60)+' min '+String(s%60).padStart(2,'0')+' s'};
+const ST={fails:0,start:Date.now(),cheats:0,ach:new Set()};
+const STAGE=$('#stage');
+let idx=0,cleaners=[];
+const later=(fn,ms)=>{const t=setTimeout(fn,ms);cleaners.push(()=>clearTimeout(t));return t};
+const every=(fn,ms)=>{const t=setInterval(fn,ms);cleaners.push(()=>clearInterval(t));return t};
+const on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);cleaners.push(()=>t.removeEventListener(ev,fn,o))};
+const W=ms=>ms*CFG.WAIT;
+
+function toast(msg,cls='',ms=3600){const t=h('div',{class:'toast '+cls},msg);$('#toasts').append(t);setTimeout(()=>t.remove(),ms)}
+function shake(el){el=el||STAGE;el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')}
+function ach(id,txt){if(ST.ach.has(id))return;ST.ach.add(id);toast('🏅 Succès : '+txt,'gold',5000)}
+const DEVILT=["Ton âme est sur la liste d'attente.","L'enfer, c'est les autres. Surtout moi.","Tu veux que j'appelle ta mère ?","Tu progresses. Vers le bas.","J'adore quand tu essaies.","C'est ça, continue. Je note tout.","Chaque échec me réchauffe le cœur.","Pas de bol. Enfin si, c'était prévu."];
+function fail(msg,el){ST.fails++;if(msg)toast(msg,'bad');if(Math.random()<(msg?.12:.4))toast('😈 '+pick(DEVILT),'devil',4200);shake(el);try{mReact('fail')}catch(e){}
+  [[1,'Première erreur. Ça commence bien.'],[10,'10 échecs : l’échauffement'],[25,'25 échecs : tu y mets du tien'],[50,'50 échecs : respect'],[100,'100 clics ratés : le champion du monde']].forEach(([n,t])=>{if(ST.fails>=n)ach('f'+n,t)})}
+const polite=()=>idx<7;
+const M=(a,b)=>polite()?a:b;
+function card(title,...kids){const c=h('div',{class:'card'},h('span',{class:'badge'},'Étape '+(idx+1)),h('h1',{},title),...kids);STAGE.append(c);return c}
+const once=f=>{let d=false;return(...a)=>{if(d)return;d=true;return f(...a)}};
+function seq(fns,done){let i=0;const nx=()=>{if(i>=fns.length)return done();STAGE.innerHTML='';window.scrollTo(0,0);fns[i++](once(nx))};nx()}
+function modal(...kids){const o=h('div',{class:'ov'},h('div',{class:'mod'},...kids));document.body.append(o);return o}
+async function typeText(el,text,typos=true,fast=false){el.textContent='';for(let i=0;i<text.length;i++){if(typos&&!fast&&Math.random()<.04&&/[a-z]/.test(text[i])){el.textContent+=String.fromCharCode(text.charCodeAt(i)+1);await sleep(220);el.textContent=el.textContent.slice(0,-1)}el.textContent+=text[i];await sleep(fast?rnd(6,18):rnd(18,55))}}
+function confetti(){const c=$('#cf'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;const cols=['#ffd23f','#ff4d5e','#3ddc84','#4d7cff','#ff7bd5'];
+  const ps=Array.from({length:200},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height,r:4+Math.random()*6,vy:2+Math.random()*4,vx:(Math.random()-.5)*3,c:pick(cols),a:Math.random()*6}));let t=0;
+  (function f(){x.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.y+=p.vy;p.x+=p.vx+Math.sin(p.a+=.05);x.fillStyle=p.c;x.fillRect(p.x,p.y,p.r,p.r*1.6)});if(++t<650)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})()}
+
+/* ============== ÉLÉMENTS GLOBAUX ============== */
+// compteur de rage (91)
+setInterval(()=>{const dp=Math.min(99,Math.round(ST.fails*1.5+ST.cheats*5));if(!document.body.classList.contains('calm'))document.documentElement.style.setProperty('--heat',Math.min(1,ST.fails/70));$('#rage').textContent=`❌ ${ST.fails} échecs · ⏱ ${fmt(Date.now()-ST.start)} · 🕵️ ${ST.cheats} triches · 🔥 damnation ${dp}%`;
+  const m=(Date.now()-ST.start)/60000;if(m>=5)ach('t5','5 minutes de ta vie');if(m>=10)ach('t10','10 minutes : tu es têtu');if(m>=20)ach('t20','20 minutes ?! Tu es fou')},1000);
+// progression menteuse (83)
+function lbl(){$('#prog').textContent=idx>=STAGES.length-2?'Plus que 1 étape (menteur)':(idx%5===4?'Plus que 3 étapes (j\'ai menti)':'Plus que 2 étapes')}
+// fil d'Ariane en spirale (75)
+function crumb(){const base=['Accueil','Salon','Cuisine','Accueil','Salon','Cuisine','Cave','Accueil'];const n=Math.min(idx+2,14);const arr=Array.from({length:n},(_,i)=>base[i%base.length]);
+  $('#crumb').innerHTML=arr.map((x,i)=>i===n-1?'<b>'+x+'</b>':x).join(' › ')}
+// horloge fausse (86)
+let clkOff=0;setInterval(()=>{if(Math.random()<.3)clkOff=ri(-9,9)*3600000+ri(0,59)*60000;const d=new Date(Date.now()+clkOff);let t=d.toLocaleTimeString('fr-FR');if(Math.random()<.08)t='25:61:'+String(ri(10,99));$('#clock').textContent='🕒 '+t},1000);
+// spectateurs (85)
+let viewers=3;setInterval(()=>{viewers=Math.random()<.12?0:Math.max(1,viewers+ri(-2,3));$('#view').textContent=`👀 ${viewers} personne${viewers>1?'s':''} regarde${viewers>1?'nt':''} cette page`},2500);
+// prix fictif (87)
+setInterval(()=>toast('🏆 '+CFG.FULL+' a gagné un prix !','prize',3000),20000);
+// témoignages (84)
+const TEMOS=["« J'ai mis 3 jours, je recommande. » — Kevin, 41 ans","« Mon écran a survécu de justesse. » — Sandrine","« Pire expérience de ma vie, 5 étoiles. » — Jean-Pierre","« Je l'ai fait en pleurant. » — Anonyme","« Le bouton m'a insulté. » — Mehdi","« Mieux qu'un escape game. » — Lucie (elle a abandonné)"];
+let ti=0;const showT=()=>{$('#foot').textContent=TEMOS[ti++%TEMOS.length]};showT();setInterval(showT,9000);
+// bandeau cookies qui revient (4,5)
+function cookieBar(){if($('#cookiebar')||document.querySelector('.ov'))return;let d=0;const bar=h('div',{id:'cookiebar'},'🍪 Nous avons mis à jour nos cookies. ',h('button',{class:'sm',onclick:()=>{bar.remove();toast('Merci. (On les avait déjà.)')}},'Tout accepter'));
+  const x=h('button',{class:'cx'},'✖');const mv=()=>{if(d++<4){x.style.top=ri(0,40)+'px';x.style.right=ri(0,200)+'px'}else x.onclick=()=>bar.remove()};x.addEventListener('mouseenter',mv);x.addEventListener('touchstart',e=>{if(d<4){e.preventDefault();mv()}},{passive:false});bar.append(x);document.body.append(bar)}
+setInterval(cookieBar,80000);
+// menu hamburger imbriqué (74)
+function burger(d=0){const o=modal(h('button',{class:'x',onclick:()=>o.remove()},'✖'),h('h1',{},'Menu niveau '+(d+1)),
+  d<3?h('button',{onclick:()=>{o.remove();burger(d+1)}},'☰ Plus d\'options'):h('p',{},'Rien ici. Vraiment rien.'))}
+$('#burger').onclick=()=>burger();
+// j'abandonne (97)
+$('#giveup').onclick=()=>{const o=modal(h('h1',{},'Abandonner ?'),h('p',{},'Tu perdras ta progression et reviendras à l\'étape 3.'),
+  h('button',{class:'big',style:'background:var(--red);color:#fff',onclick:()=>{o.remove();toast('Lâche. Retour à l\'étape 3.','bad');ach('giveup','Abandon');load(2)}},'Oui, j\'abandonne'),h('button',{class:'big',style:'background:var(--blue);color:#fff',onclick:()=>o.remove()},'Non, je continue'))};
+// chat Tess (81,82)
+const REP=["Je suis un ange. Enfin, presque. Disons que je travaille pour le patron d'en bas.","Vous avez signé, il me semble.","Les flammes ne sont pas incluses dans l'abonnement.","Très bonne question. Avez-vous essayé de l'éteindre et de le rallumer ?","Je transmets à mon supérieur (c'est mon hamster).","Je ne comprends pas, mais j'adore votre énergie.","Votre appel est important pour nous. Restez en ligne.","Je suis en pause, revenez dans 3 à 5 jours ouvrés.","Pouvez-vous reformuler en alexandrins ?","Selon nos registres, vous n'avez jamais existé.","Ah oui, le bug. Il est dans la fonctionnalité."];
+function say(t,me){const l=$('#chatlog');l.append(h('div',{class:me?'me':''},(me?'':'Tess : ')+t));l.scrollTop=1e9}
+$('#chatbtn').onclick=()=>{$('#chat').classList.toggle('on');$('#chatbtn').textContent='💬'};
+say('Bonjour, je suis Tess, démon de niveau 2 au service client. Comment puis-je vous induire en erreur ?');
+$('#chatin').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.value.trim()){say(e.target.value,true);e.target.value='';setTimeout(()=>say(pick(REP)),900)}});
+setTimeout(()=>{say("Avez-vous essayé de l'éteindre et de le rallumer ?");$('#chatbtn').textContent='💬1'},70000);
+setInterval(()=>{if(Math.random()<.5){say(pick(REP));$('#chatbtn').textContent='💬1'}},120000);
+// faux curseur (66)
+addEventListener('mousemove',e=>{const f=$('#fcur');f.style.left=(e.clientX+70)+'px';f.style.top=(e.clientY+40)+'px'});
+
+
+/* ============== MASCOTTE ============== */
+const MA=$('#mascot'),MB=$('#mbub');let mT=null,mLast=0;
+const ML={
+ fail:["Wow. Impressionnant. Pour un enfant de 4 ans.","Continue, tu as presque compris le principe.","Je ne dis rien. Je regarde juste.","C'est le bouton, pas la souris, hein.","Tu veux que j'appelle quelqu'un ?","Non mais c'est une stratégie, je suppose.","Ta mère serait si fière.","Encore raté ! Ça devient une spécialité.","Respire. Ou pas.","Je prends des notes. Pour rire.","Tu l'as fait exprès, avoue.","À ce rythme, on se retrouve l'an prochain."],
+ idle:["Alors, "+CFG.NAME+", on s'amuse ?","Ça va, tu ne t'ennuies pas trop ?","Moi je danse, toi tu cliques. Chacun son talent.","Je suis là pour t'aider. Enfin, pour regarder.","Franchement, c'est facile. Pour moi.","Un petit effort, " + CFG.NAME + " !","Tu sais que je ne peux pas t'aider ? Tant mieux.","On m'a dit que tu étais doué. On m'a menti ?"],
+ stage:["C'est parti pour une nouvelle torture. Pardon, étape.","Ah, celle-ci est dure. Bonne chance.","Allez, courage. Je suis là. Je danse.","Tu vas adorer. (Non.)","Celle-là, personne n'y arrive du premier coup.","Tu respires ? Parfait, on continue."],
+ cheat:["Je t'ai vu.","Pas de triche, "+CFG.NAME+" !","Tu cherches de l'aide ? Je suis là, mais je ne dirai rien.","Même pas honte."],
+ devil:["Ton âme est en bonnes mains. Les miennes.","Je t'ai déjà dit que je suis le diable ? Non ? Eh bien si.","Ici c'est chez moi, "+CFG.NAME+". Tu es mon invité. Permanent.","Pleure. Ça m'amuse.","Je fais ça pour ton bien. (Non.)","C'est pas moi qui ai dessiné l'enfer, j'ai juste mis des cookies.","Je te laisse croire que tu avances.","Tu as signé en bas de la page 9. Je n'invente rien.","Ta patience nourrit ma flamme. Merci.","Sois pas triste. Sois furieux, c'est meilleur."],
+ dance:["💃 Regarde-moi, je danse pendant que tu galères !","🕺 Ah, la vie est belle quand c'est pas moi qui clique.","🎶 Tralalaaa…","Je danse, tu cliques, tout le monde est content."]};
+function mSay(t,ms=4200){MB.textContent=t;MB.classList.add('on');clearTimeout(mT);mT=setTimeout(()=>MB.classList.remove('on'),ms);mLast=Date.now()}
+function mMove(){const x=rnd(100,Math.max(110,innerWidth-110)),y=rnd(150,Math.max(160,innerHeight-130));MA.classList.toggle('flip',x<parseFloat(MA.dataset.x));MA.dataset.x=x;MA.style.left=x+'px';MA.style.top=y+'px'}
+function mDance(){MA.classList.add('dance');mSay(pick(ML.dance),3600);setTimeout(()=>MA.classList.remove('dance'),3600)}
+function mReact(kind){if(Date.now()-mLast<6000&&kind==='fail')return;if(kind==='fail'&&Math.random()>.5)return;mSay(pick(kind==='fail'?ML.fail.concat(ML.devil,ML.devil):ML[kind]))}
+mMove();setInterval(mMove,6500);setInterval(()=>{if(Math.random()<.5)mDance();else if(Date.now()-mLast>12000)mSay(pick(ML.idle))},18000);
+setTimeout(()=>mSay("Salut "+CFG.NAME+" ! Je suis Bouboule, le diable de service. Je t'accompagne. Je ne t'aiderai pas.",5500),1500);
+
+
+/* ============== CHAOS : POPUPS & ÉVÉNEMENTS ALÉATOIRES ============== */
+function pop(title,text,btns,o={}){let d=0;const close=()=>ov.remove();const x=h('button',{class:'x',onclick:()=>toast('Cette croix est décorative.')},'✖');
+  const mv=()=>{d++;if(d<=3){x.style.top=ri(4,70)+'px';x.style.right=ri(4,260)+'px'}if(d>=3)x.onclick=close};x.addEventListener('mouseenter',mv);x.addEventListener('touchstart',e=>{if(d<3){e.preventDefault();mv()}},{passive:false});
+  const ov=modal(x,h('h1',{},title),h('p',{},text),...(btns||[['OK']]).map(([l,f],i)=>h('button',{class:'big',style:i?'background:var(--line);color:#fff':'',onclick:()=>{ov.remove();f&&f(ov)}},l)));return ov}
+function surveyRound(n){const ov=modal(h('h1',{},n===0?'📊 Enquête de satisfaction':n===1?'📊 Merci ! Notez maintenant le support':'📊 Dernière question, promis'),h('p',{},n===2?'Notez la qualité de cette enquête.':'Notez de 1 à 5.'),
+  h('div',{style:'display:flex;gap:6px;justify-content:center;font-size:1.8rem'},...[1,2,3,4,5].map(k=>h('button',{style:'background:none;font-size:1.8rem;padding:4px',onclick:()=>{ov.remove();if(n<2)surveyRound(n+1);else toast('Merci ! (Non je rigole, il y en a une autre dans 5 minutes.)')}},'⭐'))))}
+const CHAOS=[
+ ()=>pop('🐌 Votre ordinateur est lent','Nous avons détecté 3 213 problèmes. Cliquez pour les résoudre (ça ne résoudra rien).',[['Optimiser maintenant',()=>toast('Optimisation… terminée. Il y a 3 214 problèmes.','bad')],['Ignorer',null]]),
+ ()=>pop('🎉 Félicitations !','Tu es le 1 000 000ᵉ visiteur !',[['Réclamer mon prix',()=>pop('Erreur','En fait tu es le 1 000 001ᵉ. Désolé.',[['Zut']])]]),
+ ()=>pop('🛑 Bloqueur de pub détecté','Merci de le désactiver. Nous n\'avons pas de pub. Mais quand même.',[['J\'ai désactivé',()=>toast('Menteur. On te voit.','bad')],['Je n\'ai rien',null]]),
+ ()=>pop('🔋 Batterie faible : 1 %','Branchez votre ordinateur. (Ou pas, c\'est une blague.)',[['OK']]),
+ ()=>surveyRound(0),
+ ()=>pop('📱 Installe notre application','L\'app est 12× plus lente. Mais elle a une icône.',[['Installer',()=>toast('Installation impossible : réessaie dans 10 ans.','bad')],['Plus tard',()=>pop('Rappel','On te redemande dans 4 minutes.',[['OK']])]]),
+ ()=>pop('💧 Pense à boire de l\'eau','Rappel hydratation. (Pendant que tu galères, au moins hydrate-toi.)',[['Fait'],['Pas soif']]),
+ ()=>pop('💎 Passer à Premium','Seulement 0,99 € par seconde. Premium supprime les popups. (Non.)',[['S\'abonner',()=>toast('Abonnement refusé : trop pauvre.','bad')],['Plus tard']]),
+ ()=>pop('🖥 Erreur 0x00000FUN','Une erreur inattendue est survenue : le site fonctionne trop bien.',[['OK'],['Détails',()=>pop('Détails','Tout va bien. C\'est juste pour t\'embêter.',[['Compris']])]]),
+ ()=>pop('🤝 Nouvelle demande d\'ami','Bouboule veut devenir ton ami.',[['Accepter',()=>mSay('Trop tard, je te regardais déjà.')],['Refuser',()=>mSay('Aïe. Ça fait mal.')]]),
+ ()=>pop('🍪 Cookies (encore)','Nous avons ajouté 47 cookies à ton panier.',[['Retirer',()=>toast('Retirés. Puis remis.','bad')],['Garder']]),
+ ()=>pop('🔄 Redémarrage requis','Le site doit redémarrer pour appliquer les mises à jour.',[['Redémarrer maintenant',()=>{const o=h('div',{style:'position:fixed;inset:0;background:#000;z-index:600;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.3rem'},'Redémarrage…');document.body.append(o);setTimeout(()=>o.remove(),2500)}],['Plus tard']]),
+ ()=>{const ov=modal(h('h1',{},'📡 Connexion perdue'),h('p',{},'Reconnexion en cours (tentative 1/∞)…'));setTimeout(()=>ov.remove(),3500)},
+ ()=>{let t=10;const b=h('button',{class:'big',onclick:()=>{ov.remove();clearInterval(iv)}},'Je suis là');const p=h('p',{},'Ta session expire dans 10 s.');const ov=modal(h('h1',{},'⏰ Session sur le point d\'expirer'),p,b);
+   const iv=setInterval(()=>{t--;p.textContent=`Ta session expire dans ${t} s.`;if(t<=0){clearInterval(iv);ov.remove();ST.fails++;toast('Session expirée… (non, je rigole. +1 échec.)','bad')}},1000)},
+ ()=>{STAGE.style.transition='transform .6s';STAGE.style.transform=Math.random()<.5?'scaleX(-1)':'rotate(180deg)';toast('🌀 Gravité instable !','bad');setTimeout(()=>{STAGE.style.transform='';},4000)},
+ ()=>{let p=3;const d=h('div',{style:'position:fixed;left:8px;right:8px;bottom:42px;z-index:125;background:#173a22;border:1px solid #2c8c4d;border-radius:12px;padding:8px 12px;font-size:.8rem'},'⬇ cadeau.zip — 3 %');document.body.append(d);
+   const iv=setInterval(()=>{p+=ri(5,18);if(p>=99){clearInterval(iv);d.style.background='#4a1822';d.textContent='⬇ cadeau.zip — Échec du téléchargement à 99 %';setTimeout(()=>d.remove(),4000)}else d.textContent=`⬇ cadeau.zip — ${p} %`},900)},
+ ()=>{const ads=['Rencontre des cactus célibataires près de chez toi','Cette astuce fait pleurer les dentistes','Un grand-père découvre le Wi-Fi (incroyable)','Gagne 12 € en cliquant sur ce bandeau (non)'];let d=0;
+   const x=h('button',{class:'cx',style:'position:absolute;top:2px;right:6px;background:none;font-size:.5rem;padding:2px 4px;color:#9a9cc8'},'✖');const b=h('div',{style:'position:fixed;top:96px;left:8px;right:80px;z-index:121;background:#fff;color:#14152e;border-radius:10px;padding:10px 24px 10px 12px;font-size:.78rem;font-weight:700'},'📢 '+pick(ads),x);
+   const mv=()=>{d++;if(d<=4){x.style.top=ri(0,28)+'px';x.style.right=ri(0,200)+'px'}if(d>=4)x.onclick=()=>b.remove()};x.addEventListener('mouseenter',mv);x.addEventListener('touchstart',e=>{if(d<4){e.preventDefault();mv()}},{passive:false});document.body.append(b);setTimeout(()=>b.remove(),25000)},
+ ()=>pop('🧑‍💻 Es-tu humain ?','Cliquer ici pour vérifier. Encore.',[['Je suis humain',()=>toast('Bravo, humain confirmé. Pour l\'instant.')],['Je suis un robot',()=>toast('Honnête. Respect.')]]),
+ ()=>{const m=['Tu as appuyé sur Verr. Maj ?','Ton clavier a dit : « stop ».','Une souris est en train de te juger.'];toast('⌨ '+pick(m),'bad',4500)},
+ ()=>pop('💬 Tess t\'a envoyé un message','« Tu veux un conseil ? »',[['Oui',()=>{say('Bonjour. Non.');$('#chat').classList.add('on')}],['Non',()=>{say('Tant pis, je le dis quand même : essaie autrement.');$('#chatbtn').textContent='💬1'}]])
+];
+const DEV=[
+ ()=>pop('😈 Une voix retentit','« Tu croyais pouvoir t\'échapper, '+CFG.NAME+' ? »',[['Euh… non',()=>toast('Menteur. Je le sens.','devil')],['Si',()=>toast('Courageux. Idiot, mais courageux.','devil')]]),
+ ()=>pop('🔥 Température en hausse','Il fait chaud ici, non ? Normal, c\'est chez moi.',[['J\'ai chaud'],['Ouvre la fenêtre',()=>toast('Il n\'y a pas de fenêtre en enfer.','devil')]]),
+ ()=>pop('📋 Rappel du contrat','Tu as accepté 47 cookies, 12 pages de conditions et ton âme. Tout est en règle.',[['Je n\'ai rien signé',()=>toast('Si. Page 9, ligne 4.','devil')],['OK']]),
+ ()=>pop('🕯 Offre spéciale','Échange ton prochain clic contre 5 minutes de sérénité.',[['Accepter',()=>toast('Rien ne se passe. Je mens très bien.','devil')],['Refuser',()=>toast('Tu n\'avais pas le choix.','devil')]]),
+ ()=>pop('💀 Statistiques','Statistiquement, tu ne finiras pas. Mais continue, c\'est drôle.',[['On verra']]),
+ ()=>pop('🐐 Visite surprise','Ton conseiller infernal est en route. Il a oublié sa fourche, mais pas son humour.',[['Génial'],['Annuler',()=>toast('Annulation impossible. Clause 666.','devil')]])];
+CHAOS.push(...DEV,...DEV);
+let chaosLast=0;
+function chaos(){if(idx<2||idx>=STAGES.length-3||document.querySelector('.ov')||document.hidden)return;if(Date.now()-chaosLast<22000)return;chaosLast=Date.now();pick(CHAOS)()}
+setInterval(()=>{if(Math.random()<.85)chaos()},28000);setTimeout(chaos,35000);
+// titre d'onglet qui supplie
+const T0=document.title;let tt=null;document.addEventListener('visibilitychange',()=>{clearInterval(tt);if(document.hidden){const L=['😢 Reviens…','(3) Nouveaux messages','⚠ Cadeau en danger','Tu pars déjà ?'];let i=0;tt=setInterval(()=>document.title=L[i++%L.length],1200)}else document.title=T0});
+addEventListener('beforeunload',e=>{e.preventDefault();e.returnValue=''});
+
+/* ============== ANTI-AIDE EXTÉRIEURE ============== */
+const cheat=(m)=>{ST.cheats++;mSay(pick(ML.cheat));ach('cheat','Tentative de triche détectée');toast(m||'🕵️ Pas de triche ici.','bad')};
+['contextmenu','copy','cut','dragstart','selectstart'].forEach(ev=>addEventListener(ev,e=>{if(ev==='selectstart'&&/INPUT|TEXTAREA/.test(e.target.tagName))return;e.preventDefault();if(ev==='copy'||ev==='cut'||ev==='contextmenu')cheat('🕵️ Copier / clic droit interdit.')},true));
+addEventListener('paste',e=>{e.preventDefault();cheat('🕵️ Le copier-coller est interdit. Tape avec tes petits doigts.')},true);
+addEventListener('keydown',e=>{const k=(e.key||'').toLowerCase(),m=e.ctrlKey||e.metaKey;
+  if(e.key==='F12'||e.key==='PrintScreen'||(m&&['u','s','p','c','a','f','g'].includes(k))||(m&&e.shiftKey&&['i','j','c','k','s'].includes(k))||(m&&e.altKey&&['i','j','c','u'].includes(k))){e.preventDefault();cheat()}},true);
+// changement d'onglet / sortie prolongée (anti-IA, anti-recherche)
+let away=0;
+const goneAt=()=>{if(!away)away=Date.now()};
+const backAt=()=>{if(away&&Date.now()-away>12000&&idx>0&&idx<STAGES.length-1){ST.cheats++;toast('🕵️ Tu as quitté la page '+Math.round((Date.now()-away)/1000)+' s. Soit tu cherchais de l\'aide, soit tu avais faim. Étape recommencée.','bad',6000);ach('cheat','Tentative de triche détectée');load(idx)}away=0};
+document.addEventListener('visibilitychange',()=>document.hidden?goneAt():backAt());
+addEventListener('blur',goneAt);addEventListener('focus',backAt);
+// outils de développement (ralentissement par debugger)
+setInterval(()=>{const t=performance.now();debugger;if(performance.now()-t>150){ST.cheats++;toast('🕵️ Outils de développement détectés. Ferme-les.','bad',5000)}},4000);
+
+/* ============== ÉTAPES ============== */
+function sIntro(done){const c=card('🎁 Bienvenue '+CFG.FULL);const p=h('p',{style:'min-height:4.5em'});c.append(p,h('button',{class:'big',onclick:done},'Commencer'));
+  typeText(p,"Un cadeau d'anniversaire t'attend, "+CFG.NAME+". Il suffit de franchir quelques petites formalités. Trois, quatre maximum.")}
+
+function sCookies(done){
+  const names=["Mamie Nova","Ta voisine","Le FBI","Ton boulanger","Un pigeon à Lyon","Kevin","La Lune","Le Père Noël","Une cousine éloignée","Ton ex","Un cactus","Les Illuminati","Ton banquier","Un hamster nommé Gérard","Ta belle-mère"];
+  const list=[...names];for(let i=list.length;i<47;i++)list.push('Partenaire commercial n°'+(i+1)+' (cookies au chocolat)');
+  const box=h('div',{class:'scrollbox'});let un=0;
+  const cbs=list.map(n=>{const cb=h('input',{type:'checkbox'});cb.checked=true;cb.addEventListener('change',()=>{if(!cb.checked){un++;if(un<=25)shuf(cbs.filter(x=>!x.checked&&x!==cb)).slice(0,2).forEach(x=>x.checked=true)}});box.append(h('label',{class:'row'},cb,' '+n));return cb});
+  const save=h('button',{class:'big',disabled:''},'Enregistrer mes choix (30)');let t=Math.round(W(30));
+  every(()=>{if(t>0){t--;save.textContent=t>0?`Enregistrer mes choix (${t})`:'Enregistrer mes choix';if(t===0)save.removeAttribute('disabled')}},1000);
+  save.onclick=()=>{const n=cbs.filter(x=>x.checked).length;n?fail(`Il reste ${n} partenaire(s) actif(s).`):done()};
+  card('🍪 Gestion des cookies',h('p',{},'Conformément à la loi n°42, vous devez désactiver les 47 partenaires un par un.'),box,save)}
+
+function sPopups(done){
+  let k=0,cur=null,si=0;const bar=h('div',{class:'bar2'},'⚙️ Ce site utilise du JavaScript. (Oui, c\'est le but.) ',h('button',{class:'sm',onclick:()=>{++k<3?fail('Cliquez encore, on n\'a pas bien compris.'):bar.remove()}},'Compris'));
+  const popup=(t,p,btns)=>{const o=modal(h('button',{class:'x',onclick:()=>toast('Cette croix est décorative.')},'✖'),h('h1',{},t),h('p',{},p),...btns.map(([l,f],i)=>h('button',{class:'big',style:i?'background:var(--line);color:#fff':'',onclick:f},l)));return o};
+  const n=()=>{cur&&cur.remove();si<steps.length?cur=steps[si++]():done()};
+  const steps=[()=>popup('📬 Reste informé !','Inscris-toi à notre newsletter hebdomadaire (7 mails/jour).',[['S\'inscrire',()=>{toast('Tu es déjà inscrit(e) 😈');n()}],['Non merci, je préfère être mal informé',n]]),
+    ()=>popup('🔔 Activer les notifications ?','On promet de ne pas t\'écrire (menteurs).',[['Autoriser',n],['Plus tard',n]]),
+    ()=>popup('🙏 Merci d\'avoir refusé','Voici une autre demande : accès à ta position, ta caméra, ton frigo, ton âme.',[['Tout autoriser',n],['Refuser',n]])];
+  card('Quelques formalités…',bar,h('p',{},'Merci de répondre aux demandes qui vont apparaître.'),h('button',{class:'big',onclick:()=>{n()}},'Je suis prêt'))}
+
+function sCGU(done){
+  const S=["Le Bénéficiaire reconnaît que le Cadeau est fourni en l'état, avec une pointe de mauvaise foi.","En cliquant, vous renoncez à toute dignité présente ou future.","Le Prestataire décline toute responsabilité en cas de larmes, cris ou écran fissuré.","Les présentes conditions prévalent sur toute logique contraire.","Toute tentative d'abandon sera consignée dans un registre que personne ne lira.","Le Cadeau ne peut être échangé, remboursé, ni compris.","Le Bénéficiaire accepte d'être appelé « champion » ironiquement.","Les articles 4 à 9 ont été mangés par un chien."];
+  const box=h('div',{class:'scrollbox',style:'max-height:300px'});
+  for(let p=1;p<=12;p++){box.append(h('p',{style:'color:var(--ink);font-weight:700'},`— Page ${p}/12 —`));for(let i=0;i<6;i++)box.append(h('p',{},`Art. ${p}.${i+1} ${pick(S)}`))}
+  const btn=h('button',{class:'big',disabled:''},"J'ai lu"),info=h('div',{class:'msg'});let bottom=false,t=Math.round(W(20));
+  const chk=()=>{if(bottom&&t<=0)btn.removeAttribute('disabled')};
+  box.addEventListener('scroll',()=>{if(box.scrollTop+box.clientHeight>=box.scrollHeight-4){bottom=true;chk()}});
+  every(()=>{if(t>0){t--;info.textContent=`Lecture attentive en cours… ${t} s`;chk()}else if(!bottom)info.textContent='Descends jusqu\'en bas, on te surveille.'},1000);
+  btn.onclick=done;card('📜 Conditions générales',h('p',{},'Merci de lire intégralement les 12 pages.'),box,info,btn)}
+
+function sBirth(done){
+  const fns=[
+  (nx)=>{let year=1900,day=1,tries=0,timer=null;const yd=h('div',{style:'font-size:2rem;text-align:center;font-weight:800'},year),dd=h('div',{style:'font-size:1.4rem;text-align:center'},'Jour : 1');
+    const stop=()=>{clearInterval(timer);timer=null};const spin=(dir)=>{stop();timer=setInterval(()=>{year=Math.max(1850,Math.min(2030,year+dir*ri(1,9)));yd.textContent=year},45)};
+    const mk=(txt,dir)=>{const b=h('button',{style:'flex:1'},txt);b.addEventListener('pointerdown',e=>{e.preventDefault();spin(dir)});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));return b};
+    const dm=h('button',{style:'width:100%;margin-top:6px'},'Jour +3 (ça saute)');dm.onclick=()=>{day=((day+2)%31)+1;dd.textContent='Jour : '+day};
+    yd.addEventListener('wheel',e=>{e.preventDefault();year+=Math.sign(e.deltaY)*-ri(3,15);year=Math.max(1850,Math.min(2030,year));yd.textContent=year},{passive:false});
+    const msg=h('div',{class:'msg'});
+    card('📅 Date de naissance',h('p',{},'Maintenez les boutons pour faire défiler l\'année.'),yd,h('div',{style:'display:flex;gap:8px;margin-top:6px'},mk('▲ Année',1),mk('▼ Année',-1)),dd,dm,msg,
+      h('button',{class:'big',onclick:()=>{stop();tries++;if(year<1997||year>2002){fail(`Année ${year} ? Tu ne fais pas ${CFG.AGE} ans.`);year=1900;yd.textContent=year}else if(tries<3){fail('Cette date est suspecte, retape-la.');year=1900;yd.textContent=year}else nx()}},'Valider')) },
+  (nx)=>{let n=0;const V=['Tomas','Thommas','Tom-Tom'];const inp=h('input',{type:'text',placeholder:'Prénom',autocomplete:'off'});
+    inp.addEventListener('input',()=>{if(inp.value.trim().toLowerCase()==='thomas'&&n<V.length){inp.value=V[n++];toast('✏️ Correction automatique appliquée')}});
+    card('🧑 Ton prénom',h('p',{},'Merci de saisir votre prénom.'),inp,h('button',{class:'big',onclick:()=>{inp.value.trim()==='Thomas'?nx():fail('Prénom invalide.')}},'Valider'))},
+  (nx)=>{const L=[v=>`${v} ans ? Tu mens.`,v=>`Non, ${v} ans c'est impossible, tu fais plus vieux.`,v=>`Allez ${CFG.FULL}, sois honnête.`,v=>`On a vérifié nos registres. Ce n'est pas ${v}.`];let k=0;const inp=h('input',{type:'number',placeholder:'Votre âge',inputmode:'numeric'}),msg=h('div',{class:'msg'});
+    card('🔞 Quel âge avez-vous ?',h('p',{},'Contenu réservé aux personnes d\'un certain âge.'),inp,msg,h('button',{class:'big',onclick:()=>{if(!inp.value)return fail('Un chiffre, s\'il te plaît.');if(k<L.length){msg.textContent=L[k++](inp.value);fail();inp.value=''}else nx()}},'Valider'))}];
+  seq(fns,done)}
+
+function sForm(done){
+  let tries=0,t0=Date.now(),fastDone=false;
+  const F=[['prenom','Prénom'],['nom','Nom'],['email','E-mail','email'],['tel','Téléphone (en chiffres romains)'],['pays','Pays','sel'],['ville','Ville'],['cp','Code postal'],['pointure','Pointure'],['couleur','Couleur préférée'],['animal','Animal préféré'],['pseudo','Pseudo (20 caractères max.)'],['pw','Mot de passe','password'],['pw2','Confirmer le mot de passe','password'],['mere','Nom de jeune fille de ta mère'],['why','Pourquoi veux-tu ouvrir ce cadeau ? (300 caractères minimum)','ta']];
+  const f={};const c=card('📝 Création de compte');
+  F.forEach(([k,l,t])=>{let el;if(t==='sel'){el=h('select',{},...['Suisse','La Lune','Belgique'].map(x=>h('option',{},x)))}else if(t==='ta')el=h('textarea',{rows:'4'});else el=h('input',{type:t||'text',autocomplete:'off'});f[k]=el;c.append(h('label',{class:'f'},l),el)});
+  f.pseudo.addEventListener('input',()=>{if(f.pseudo.value.length>=20){f.pseudo.value='';toast('Pseudo trop long : effacé par sécurité.','bad')}});
+  const rulesBox=h('div',{style:'font-size:.78rem;color:var(--muted);margin-top:6px'}),msg=h('div',{class:'msg'});
+  const RULES=[[x=>x.length>=8,'au moins 8 caractères'],[x=>/[A-Z]/.test(x),'une majuscule'],[x=>/\d/.test(x),'un chiffre'],[x=>/\p{Extended_Pictographic}/u.test(x),'un emoji'],[x=>/(on|ier|ou)$/i.test(x),'finir par une rime en -on, -ier ou -ou'],[x=>/mère|mere|maman/i.test(x),'contenir le prénom de ta mère (ou « maman »)']];
+  const showRules=()=>{const act=shuf(RULES.slice(0,Math.min(RULES.length,2+tries))).slice(0,Math.min(RULES.length,3+tries));rulesBox.innerHTML='Règles actuelles : '+act.map(r=>'<br>• '+r[1]).join('');return act};
+  let act=showRules();c.append(rulesBox,msg,h('button',{class:'big',onclick:()=>{
+    if(!fastDone&&Date.now()-t0<W(25000)){fastDone=true;F.forEach(([k])=>{if(f[k].tagName!=='SELECT')f[k].value=''});return fail('Formulaire envoyé trop vite : par sécurité, nous l\'avons vidé.')}
+    tries++;if(tries>=7)return done();
+    const v=k=>f[k].value.trim();const bad=[];
+    if(!/^[IVXLCDM]+$/i.test(v('tel')))bad.push('Veuillez saisir une valeur valide.');
+    else if(act.some(r=>!r[0](v('pw'))))bad.push('Veuillez saisir une valeur valide.');
+    else if(v('pw')!==v('pw2'))bad.push('Les mots de passe ne correspondent pas (exactement).');
+    else if(tries<5)bad.push('Ce mot de passe est déjà utilisé.');
+    else if(tries<4&&v('mere')!=='')bad.push('Ce n\'est pas ce que nous avons dans nos fichiers.');
+    else if(v('why').length<(tries>=5?50:300))bad.push('Veuillez saisir une valeur valide.');
+    else return done();
+    msg.textContent=bad[0];fail();act=showRules()}},'Créer mon compte'))}
+
+/* ---- captchas ---- */
+function cTomato(nx){let clicks=0,tries=0;const pool=['🍅','🍅','🍅','🍎','🔴','🌹','🍅'];const g=h('div',{class:'grid'});
+  for(let i=0;i<9;i++){const t=h('div',{class:'tile'},pick(pool));t.onclick=()=>{t.classList.add('sel');clicks++;setTimeout(()=>{t.textContent=pick(pool);t.classList.remove('sel')},350)};g.append(t)}
+  card('🤖 Anti-robot (1/7)',h('p',{},'Sélectionne tous les feux rouges.'),g,h('button',{class:'big',onclick:()=>{tries++;clicks>=12||tries>=4?nx():fail(M('Veuillez réessayer.','Tu as oublié un feu. Ou pas.'))}},'Vérifier'))}
+function cLetters(nx){const chars=[...'O0Il1B8S5Z2'];const code=Array.from({length:6},()=>pick(chars)).join('');const cv=h('canvas',{width:'280',height:'80',style:'background:#0d0e22;border-radius:10px'});const x=cv.getContext('2d');
+  for(let i=0;i<6;i++){x.save();x.translate(24+i*40,44+rnd(-8,8));x.rotate(rnd(-.4,.4));x.font='bold 36px monospace';x.fillStyle=pick(['#ffd23f','#3ddc84','#ff7bd5','#8fb0ff']);x.fillText(code[i],0,0);x.restore()}
+  for(let i=0;i<6;i++){x.strokeStyle='#ffffff55';x.beginPath();x.moveTo(rnd(0,280),rnd(0,80));x.lineTo(rnd(0,280),rnd(0,80));x.stroke()}
+  let tries=0;const inp=h('input',{type:'text',placeholder:'Recopie les caractères',autocomplete:'off'});
+  card('🤖 Anti-robot (2/7)',h('p',{},'Recopie les caractères (majuscules/minuscules : on décide).'),cv,inp,h('button',{class:'big',onclick:()=>{tries++;inp.value.trim()===code||tries>=4?nx():(fail('Presque. Ou pas.'),inp.value='')}},'Vérifier'))}
+function cMath(nx){let tries=0;const inp=h('input',{type:'text',placeholder:'Réponse'});card('🤖 Anti-robot (3/7)',h('p',{},'Combien font 0 ÷ 0 ?'),inp,h('button',{class:'big',onclick:()=>{tries++;tries>=4?nx():fail(['Faux.','Toujours faux.','Réponse indéfinie… comme ton avenir.'][tries-1]||'Non.')}},'Vérifier'))}
+function cSlider(nx){let tol=.01;const r=h('input',{type:'range',min:'0',max:'100',step:'0.01',value:'10',style:'width:100%'}),o=h('div',{style:'text-align:center;font-weight:800;font-size:1.4rem'},'10.00');r.oninput=()=>o.textContent=(+r.value).toFixed(2);
+  card('🤖 Anti-robot (4/7)',h('p',{},'Place le curseur exactement sur 50.'),o,r,h('button',{class:'big',onclick:()=>{Math.abs(r.value-50)<=tol?nx():(fail(`Tu es à ${(+r.value).toFixed(2)}.`),tol*=4)}},'Vérifier'))}
+function cDot(nx){let hits=0,sp=2,x=60,y=60,vx=sp,vy=sp*.8;const box=h('div',{style:'position:relative;height:200px;background:#0d0e22;border-radius:12px;overflow:hidden;margin:10px 0'});
+  const dot=h('button',{style:'position:absolute;width:44px;height:44px;border-radius:50%;padding:0;background:var(--red)'},'🎯');box.append(dot);
+  dot.onclick=()=>{hits++;sp*=1.45;vx=Math.sign(vx)*sp;vy=Math.sign(vy)*sp*.8;if(hits>=4)nx()};
+  every(()=>{const W2=box.clientWidth-44,H2=box.clientHeight-44;x+=vx;y+=vy;if(x<0||x>W2)vx=-vx;if(y<0||y>H2)vy=-vy;dot.style.left=x+'px';dot.style.top=y+'px'},30);
+  card('🤖 Anti-robot (5/7)',h('p',{},'Clique 4 fois sur la cible.'),box)}
+function cPuzzle(nx){let tries=0;const tiles=['🌅','🌊','🏖️','🌴','🐚','🦀','⛵','🐠'];const g=h('div',{class:'grid',style:'max-width:240px;margin:12px auto'});
+  tiles.forEach(t=>g.append(h('div',{class:'tile',style:'font-size:1.8rem'},t)));g.append(h('div',{class:'tile',style:'background:#000;color:#555'},'?'));
+  const ops=h('div',{style:'display:flex;gap:8px;justify-content:center'},...['🐢','🏄','🧊','🦀'].map(p=>h('button',{onclick:()=>{tries++;tries>=3?nx():fail('Cette pièce ne va pas.')}},p)));
+  card('🤖 Anti-robot (6/7)',h('p',{},'Trouve la pièce manquante.'),g,ops)}
+function cRobot(nx){let n=0;const cb=h('input',{type:'checkbox',style:'width:28px;height:28px'}),msg=h('div',{class:'msg'});
+  cb.onchange=()=>{if(!cb.checked)return;setTimeout(()=>{n++;if(n<4){cb.checked=false;fail('Vérification échouée. Tu ressembles à un robot.');msg.textContent=''}else{msg.className='msg ok';msg.textContent='Validé ✅';setTimeout(nx,700)}},700)};
+  card('🤖 Anti-robot (7/7)',h('label',{style:'display:flex;gap:12px;align-items:center;font-size:1.1rem;margin:14px 0'},cb,'Je ne suis pas un robot'),msg)}
+function sCaptchas(done){seq([cTomato,cLetters,cMath,cSlider,cDot,cPuzzle,cRobot],done)}
+
+/* ---- quiz ---- */
+function sQuiz(done){
+  const Q=[['Quel est le prénom de '+CFG.FULL+' ?',['Thomas','Tomas','Thommas','Aucune des réponses'],3],
+    ['Combien de pattes a un poulet en dessous de 20 °C ?',['2','3','4','Aucune des réponses'],3],
+    ['Quelle est la capitale de la Belgique ?',['Bruxelles','Anvers','Gand','Aucune des réponses'],3],
+    ['Combien font 2 + 2 ?',['3','4','5','Aucune des réponses'],1],
+    ['De quelle couleur est le cheval blanc d\'Henri IV ?',['Blanc','Noir','Bleu','Aucune des réponses'],0],
+    ['Quel animal miaule généralement ?',['Le chien','Le chat','La vache','Aucune des réponses'],1]];
+  let q=0,wrong=0;const show=()=>{STAGE.innerHTML='';const [t,o,ok]=Q[q];const msg=h('div',{class:'msg'});
+    card(`🧠 Quiz (${q+1}/${Q.length})`,h('p',{style:'color:var(--ink);font-weight:700'},t),...o.map((l,i)=>h('button',{class:'big',style:'background:var(--line);color:#fff;margin-top:8px',onclick:()=>{if(i===ok||wrong>=2){wrong=0;q++;q>=Q.length?done():show()}else{wrong++;fail('Mauvaise réponse.');}}},l)),msg)};show()}
+
+/* ---- jeux ---- */
+function gMaze(nx){const N=7;let px=0,py=0,bumps=0;const wall=new Set(['5,6','6,5','3,1','3,2','3,3','1,3','2,3','4,4','4,5','5,3']);const ex='6,6';const g=h('div',{style:'display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-width:300px;margin:12px auto'});
+  const draw=()=>{g.innerHTML='';for(let y=0;y<N;y++)for(let x=0;x<N;x++){const k=x+','+y;g.append(h('div',{style:'aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:'+(wall.has(k)?'#444a9c':'#0d0e22')},x===px&&y===py?'🧍':k===ex?'🚪':''))}};
+  const mv=(dx,dy)=>{const x=px+dx,y=py+dy;if(x<0||y<0||x>=N||y>=N)return;const k=x+','+y;if(wall.has(k)){bumps++;fail(bumps>12?null:'Mur.');if(bumps>=15){wall.delete('5,6');wall.delete('6,5');toast('Les murs s\'ouvrent… par pitié.')}draw();return}px=x;py=y;draw();if(k===ex)nx()};
+  const kd=e=>{const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();mv(...m)}};on(window,'keydown',kd);
+  const pad=h('div',{style:'display:grid;grid-template-columns:repeat(3,60px);gap:6px;justify-content:center'},'',h('button',{onclick:()=>mv(0,-1)},'⬆'),'',h('button',{onclick:()=>mv(-1,0)},'⬅'),h('button',{onclick:()=>mv(0,1)},'⬇'),h('button',{onclick:()=>mv(1,0)},'➡'));
+  draw();card('🌀 Labyrinthe',h('p',{},'Atteins la sortie 🚪.'),g,pad)}
+function gErrors(nx){let n=0;const E=['🍎','🍌','🍇','🍓','🍒','🍑','🥝','🍍','🥥','🍋','🍐','🍉','🥭','🍈','🫐','🍊','🍏','🍅','🌽','🥕','🥔','🌶️','🥦','🍄','🧅'];
+  const mk=()=>h('div',{style:'display:grid;grid-template-columns:repeat(5,1fr);gap:4px'},...E.map(e=>h('div',{style:'font-size:1.4rem;text-align:center;cursor:pointer',onclick:()=>{n++;n>=10?nx():fail(`Ce n'est pas une différence. (${n}/7)`)}},e)));
+  card('🔍 Trouve les 7 erreurs',h('p',{},'Clique sur chaque différence entre les deux images.'),mk(),h('p',{style:'text-align:center'},'⚖️'),mk())}
+function gCharlie(nx){let n=0,pos=ri(0,69);const C=['🧑','👩','👨','🧓','👧','👦','🧔','👱','👮','🧑‍🍳'];const g=h('div',{style:'display:grid;grid-template-columns:repeat(10,1fr);gap:2px'});
+  const draw=()=>{g.innerHTML='';for(let i=0;i<70;i++)g.append(h('div',{style:'font-size:1.1rem;text-align:center;cursor:pointer',onclick:()=>{if(i===pos||n>=6)return nx();n++;fail('Ce n\'est pas Charlie.');pos=ri(0,69);draw()}},i===pos?'👓':pick(C)))};draw();
+  card('🔎 Où est Charlie ?',h('p',{},'Trouve 👓 dans la foule.'),g)}
+function gReflex(nx){let early=0,state='wait';const z=h('div',{style:'height:180px;border-radius:14px;background:var(--red);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;cursor:pointer;color:#fff'},'Attends le vert…');
+  const arm=()=>{state='wait';z.style.background='var(--red)';z.textContent='Attends le vert…';later(()=>{state='go';z.style.background='var(--green)';z.textContent='CLIQUE !'},W(early>=3?8000:early>=1?14000:20000))};
+  z.onclick=()=>{if(state==='go')nx();else{early++;fail('Trop tôt !');clearAll();arm()}};let tm;const clearAll=()=>{};arm();
+  card('⚡ Test de réflexes',h('p',{},'Clique dès que l\'écran devient vert.'),z)}
+function sGames(done){seq([gMaze,gErrors,gCharlie,gReflex],done)}
+
+/* ---- salles d'attente ---- */
+function wQueue(nx){let pos=4812,jumps=0;const p=h('div',{style:'font-size:2.2rem;font-weight:800;text-align:center;margin:12px 0'});const info=h('p',{style:'text-align:center'},'Merci de patienter, votre place est importante pour nous.');
+  const upd=()=>p.textContent=`Vous êtes ${pos}ᵉ`;upd();
+  every(()=>{pos-=ri(120,260);if(jumps<2&&Math.random()<.07&&pos<3000){pos+=ri(900,1500);jumps++;toast('File d\'attente recalculée.','bad')}if(pos<=1){pos=1;upd();nx()}else upd()},W(1000));
+  card('⏳ File d\'attente',p,info)}
+function wCount(nx){let t=30,resets=0;const o=h('div',{style:'font-size:3rem;text-align:center;font-weight:800'},t);card('⏱ Initialisation',h('p',{},'Ne touchez à rien : ne bougez pas la souris.'),o);
+  on(window,'mousemove',()=>{if(resets<3&&t<28){t=30;resets++;toast('Mouvement détecté. On recommence.','bad')}});
+  every(()=>{t--;o.textContent=Math.max(t,0);if(t<=0)nx()},W(1000)/1)}
+function wStuck(nx){let t=10;const o=h('div',{style:'font-size:3rem;text-align:center;font-weight:800'},t),m=h('p',{style:'text-align:center'},'Encore quelques secondes…');card('⏱ Dernière vérification',o,m);
+  every(()=>{if(t>1){t--;o.textContent=t}else{m.textContent=['Presque…','Juste une seconde…','Chargement final…','Ça arrive…'][ri(0,3)];window.__s=(window.__s||0)+1;if(window.__s>W(24)){window.__s=0;nx()}}},1000)}
+function wBar(nx){let p=0,resets=0,mul=1,tm=null;const f=h('i'),pc=h('p',{style:'font-weight:800;color:var(--ink);margin:0'},'0%'),est=h('p',{},'Temps restant estimé : 3 h 47'),tx=h('p',{});
+  const L=['Téléchargement du cadeau…','Recherche du ruban…','Négociation avec le serveur…','Le hamster du serveur fait une pause…','Calcul de ton âge réel…'];
+  const run=()=>{clearInterval(tm);tm=setInterval(()=>{p+=(rnd(.4,3.4))*mul/CFG.WAIT;if(resets<3&&p>=99){p=99;draw();clearInterval(tm);tx.textContent='Erreur : le cadeau s\'est enfui. Redémarrage…';later(()=>{resets++;p=rnd(5,25);mul=1;run()},1200);return}
+      if(p>=100){clearInterval(tm);p=100;draw();nx();return}if(Math.random()<.06&&resets<3)p=Math.max(0,p-15);draw()},250);cleaners.push(()=>clearInterval(tm))};
+  const draw=()=>{f.style.width=p+'%';pc.textContent=Math.floor(p)+'%';est.textContent='Temps restant estimé : '+ri(0,9)+' h '+String(ri(0,59)).padStart(2,'0');if(Math.random()<.1)tx.textContent=pick(L)};
+  card('⏳ Chargement du cadeau',h('div',{class:'bar'},f),pc,est,tx,h('p',{},'99 % des gens ont déjà abandonné à cette étape.'),h('button',{class:'big',style:'background:var(--yellow);color:#332600',onclick:()=>{mul=Math.max(.15,mul*.6);p=Math.max(0,p-10);toast('Merci d\'avoir cliqué. Ça a ralenti.')}},'⚡ Accélérer'));run()}
+function wUpdate(nx){let i=1,reset=false;const o=h('div',{style:'font-size:1.6rem;font-weight:800;text-align:center;margin:14px 0'});const tx=h('p',{style:'text-align:center'},'Ne pas éteindre l\'ordinateur.');card('🛠 Installation de la mise à jour',o,tx);
+  every(()=>{i+=ri(1,3);if(!reset&&i>150){reset=true;i=1;tx.textContent='Erreur critique. Reprise à 1.';toast('Mise à jour réinitialisée.','bad')}if(i>=219){nx()}else o.textContent=`${i}/219`},W(110))}
+function wStill(nx){let st=0;const bar=h('div',{class:'bar'},h('i',{style:'width:30%'}));card('⏳ Traitement en cours',bar,h('p',{},'Veuillez patienter.'));
+  later(()=>{const o=modal(h('h1',{},'Vous êtes encore là ?'),h('p',{},'Cliquez dans les 4 secondes ou la session expirera.'),h('button',{class:'big',onclick:()=>{o.remove();clearTimeout(tt);later(nx,W(5000))}},'Oui, je suis là'));
+    const tt=setTimeout(()=>{o.remove();toast('Session expirée. On recommence.','bad');fail();STAGE.innerHTML='';wStill(nx)},4000);cleaners.push(()=>clearTimeout(tt))},W(8000))}
+function wAV(nx){let p=0;const f=h('i'),l=h('p',{},'Analyse de cadeau_FINAL_v2_vraiment_final.exe');const M2=['Menace détectée : trop de fun','Mise en quarantaine…','Faux positif probable','Vérification du ruban…'];
+  card('🛡 Antivirus',l,h('div',{class:'bar'},f),h('p',{id:'avl'},'Analyse en cours…'));
+  every(()=>{p+=rnd(1,6);f.style.width=Math.min(100,p)+'%';if(Math.random()<.15)$('#avl').textContent=pick(M2);if(p>=100)nx()},W(400))}
+function wBobby(nx){let n=0;const tx=h('p',{style:'text-align:center;font-size:1.1rem'},'Connexion au serveur de Bobby…');card('🖥 Serveur',tx);
+  every(()=>{n++;if(n>=7)return nx();tx.textContent=`Échec de la connexion au serveur de Bobby (tentative ${n}/7). Nouvelle tentative…`;ST.fails++},W(1600))}
+function wCrash(nx){const f=$('#fake');f.style.display='flex';const L=['Suppression du cadeau en cours…','Suppression terminée à 87 %…','Annulation de la suppression…'];let i=0;
+  card('…');const tm=setInterval(()=>{$('#fakeLine').textContent=L[Math.min(i++,2)]},1100);
+  later(()=>{clearInterval(tm);f.style.display='none';toast('Non, c\'est bon, il est là. Fausse alerte 😈','prize');nx()},4200);cleaners.push(()=>{clearInterval(tm);f.style.display='none'})}
+function sWait(done){seq([wQueue,wCount,wStuck,wBar,wUpdate,wStill,wAV,wBobby,wCrash],done)}
+
+/* ---- parcours de boutons ---- */
+function sGauntlet(done){
+  if(!matchMedia('(pointer:coarse)').matches)document.body.classList.add('fc');
+  const NB=(txt,body)=>card(txt,...body);
+  const fns=[
+  (nx)=>{let d=0;const run=h('button',{style:'position:fixed;z-index:50;background:var(--red)'},'Ouvrir mon cadeau');const taunt=h('p',{style:'text-align:center;color:var(--yellow);font-weight:700'},'');
+    const mv=()=>{run.style.left=Math.max(8,Math.random()*(innerWidth-170))+'px';run.style.top=Math.max(120,Math.random()*(innerHeight-200))+'px'};
+    const T=["Trop lent !","Haha non.","Par ici !","Presque…","Tu chauffes (non).","Respire.","Ça fait mal à l'ego, hein ?","Encore un petit effort !","Dernière fois (menteur)."];
+    const dg=e=>{if(d>=9)return;e.preventDefault();d++;taunt.textContent=T[(d-1)%T.length]+` (${d}/9)`;if(d>=9){run.style.background='var(--green)';run.style.color='#06210f';run.textContent='Ok, tu as gagné 🏆'}else mv()};
+    run.style.left='40%';run.style.top='50%';run.addEventListener('mouseenter',dg);run.addEventListener('touchstart',dg,{passive:false});run.onclick=e=>{if(d<9)dg(e);else{run.remove();nx()}};document.body.append(run);cleaners.push(()=>run.remove());
+    card('🎁 Ouvre ton cadeau',h('p',{},'Il suffit d\'appuyer sur le bouton. Un enfant y arriverait.'),taunt,h('div',{style:'height:120px'}))},
+  (nx)=>{let n=0;const b=h('button',{class:'big'},'Cliquer ici');let alt=false;b.addEventListener('mouseenter',()=>{if(n<3){alt=true;b.textContent='Pas ici';setTimeout(()=>{alt=false;b.textContent='Cliquer ici'},1100)}});
+    b.onclick=()=>{if(alt&&n<3){n++;fail('Je t\'avais dit : pas ici.')}else nx()};card('🖱 Bouton à texte variable',h('p',{},'Clique quand il est d\'accord.'),b)},
+  (nx)=>{let n=0;const big=h('button',{class:'big',style:'background:var(--blue);color:#fff;padding:26px',onclick:()=>{n++;fail('Pas par là.');if(n>=5)toast('Le petit bouton, en haut à droite.')}},'Précédent'),sm=h('button',{class:'tiny',style:'position:absolute;top:8px;right:8px',onclick:nx},'suivant');
+    const c=card('➡ Navigation',h('p',{},'Pour continuer, cliquez sur Suivant.'),big);c.style.position='relative';c.append(sm)},
+  (nx)=>{let n=0;const a=h('button',{style:'flex:1;background:var(--green);color:#06210f'},'Oui'),b=h('button',{style:'flex:1;background:var(--red)'},'Non');
+    const sw=()=>{if(n<3){const t=a.textContent;a.textContent=b.textContent;b.textContent=t}};
+    [a,b].forEach(x=>{x.addEventListener('pointerdown',sw);x.addEventListener('click',()=>{x.textContent==='Oui'?nx():(n++,fail('Tu as dit non. Dommage.'))})});
+    card('❓ Confirmer ?',h('p',{},'Veux-tu continuer ?'),h('div',{style:'display:flex;gap:10px'},a,b))},
+  (nx)=>{let ph=1,cnt=0,t0=0;const b=h('button',{class:'big'},'Clique 10 fois en moins de 4 s'),info=h('p',{});
+    b.onclick=()=>{const now=Date.now();if(ph===1){if(!cnt||now-t0>4000){cnt=0;t0=now}cnt++;info.textContent=cnt+'/10';if(cnt>=10){ph=2;cnt=0;b.textContent='Maintenant 10 clics lents (≥1 s entre chaque)';info.textContent='0/10';t0=0}}
+      else{if(t0&&now-t0<1000){cnt=0;info.textContent='Trop rapide ! 0/10';fail()}else{cnt++;info.textContent=cnt+'/10'}t0=now;if(cnt>=10)nx()}};
+    card('👆 Rapide puis lent',info,b)},
+  (nx)=>{let fails=0,tm=null,t=0;const b=h('button',{class:'big',style:'padding:24px'},'Maintiens appuyé 15 s'),f=h('i'),bar=h('div',{class:'bar'},f),info=h('p',{});
+    const stop=()=>{clearInterval(tm);tm=null;f.style.width='0'};const need=()=>fails>=2?9:15;
+    b.addEventListener('pointerdown',e=>{e.preventDefault();t=0;tm=setInterval(()=>{t+=.1;f.style.width=Math.min(100,t/need()*100)+'%';if(t>=need()){stop();nx()}else if(fails<2&&t>=14){stop();fails++;fail('Relâché trop tôt (à 14 s).');info.textContent='Raté.'}},100)});
+    ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{if(tm){stop()}}));cleaners.push(stop);
+    card('✋ Maintenir',bar,info,b)},
+  (nx)=>{let n=0;const skip=h('button',{style:'width:100%;padding:18px;background:#444a9c'},'Passer'),real=h('button',{style:'position:absolute;left:0;bottom:0;width:48px;height:48px;opacity:.02;padding:0'},'⏭');
+    skip.onclick=()=>{n++;fail('Faux bouton. Le vrai est ailleurs.');if(n>=3)toast('Indice : coin inférieur gauche de la carte.')};real.onclick=nx;
+    const c=card('⏭ Passer l\'épreuve',h('p',{},'Bouton « Passer » disponible ci-dessous.'),skip);c.style.position='relative';c.style.paddingBottom='60px';c.append(real)},
+  (nx)=>{let last=0,fails=0;const b=h('button',{class:'big',style:'padding:24px'},'Double-clique en moins de 200 ms');
+    b.onclick=()=>{const now=Date.now(),g=now-last;last=now;if(g<30)return;if(g<=(fails>=4?420:200))nx();else if(g<1200){fails++;fail(`${g} ms. Trop lent.`)}};card('⚡ Double clic',b)},
+  (nx)=>{let n=0;const b=h('button',{class:'big',style:'transition:transform .15s'},'Clique-moi (8×)');b.onclick=()=>{n++;if(n>=8)return nx();b.style.transform=`scale(${Math.pow(.78,n)})`;b.textContent=`${n}/8`};card('🔬 Bouton qui rétrécit',b)},
+  (nx)=>{let n=0;const mk=()=>{STAGE.innerHTML='';card('🧭 Confirmation',h('p',{},'Que souhaitez-vous faire ?'),
+      h('button',{class:'big',style:'background:var(--red);color:#fff',onclick:()=>{toast('Annulé… enfin, validé quand même 😈');nx()}},'Annuler'),
+      h('button',{class:'big',style:'background:var(--line);color:#fff',onclick:()=>{toast('Retour 3 épreuves en arrière.','bad');back()}},'Retour'),
+      h('button',{class:'big',onclick:()=>{const o=modal(h('h1',{},'Êtes-vous sûr ?'),h('p',{},'Vraiment sûr ? Même pas un peu ?'),h('button',{class:'big',onclick:()=>{o.remove();nx()}},'Oui')) }},'Valider'))};mk()},
+  (nx)=>{let s=0;const b=h('button',{class:'big',style:'transition:transform .2s;transform-origin:left center'},'Je grossis');const mk=()=>{b.onmouseenter=()=>{s++;b.style.transform=`scale(${1+s*.25})`}};mk();
+    b.onclick=()=>s>=4?nx():fail('Trop petit pour être cliqué. Attends qu\'il grossisse.');card('🎈 Bouton qui grossit',h('p',{},'Survole-le puis clique.'),h('div',{style:'height:50px;overflow:visible'},b),h('div',{style:'height:70px'}))},
+  (nx)=>{let n=0;const knob=h('i'),sw=h('span',{class:'sw'},knob);let on_=false;sw.onclick=()=>{n++;if(n>=6){knob.style.left='39px';return setTimeout(nx,500)}knob.style.left='21px';setTimeout(()=>knob.style.left='3px',350);fail()};
+    card('🔘 Interrupteur',h('p',{},'Active l\'interrupteur.'),sw)},
+  (nx)=>{let lv=0;const mk=()=>{STAGE.innerHTML='';const a=h('a',{href:'javascript:void 0',style:'color:var(--blue);font-size:1.2rem;position:relative;left:'+ri(0,60)+'%',onclick:e=>{e.preventDefault();lv++;lv>=12?nx():mk()}},'Cliquer ici');card(`🔗 Niveau ${lv+1}/12`,h('p',{},'Un petit lien tout simple.'),h('div',{style:'height:50px;padding-top:14px'},a))};mk()}];
+  const back=()=>run(Math.max(0,ix-3));
+  let ix=0;const run=(i)=>{ix=i;STAGE.innerHTML='';window.scrollTo(0,0);if(i>=fns.length){document.body.classList.remove('fc');return done()}fns[i](once(()=>run(i+1)))};run(0)}
+
+/* ---- scroll ---- */
+function sScroll(done){
+  document.body.classList.add('noscroll');
+  const fns=[
+  (nx)=>{const line=h('div',{style:'overflow-x:auto;white-space:nowrap;font-size:5px;color:var(--muted);padding:6px;border:1px solid var(--line);border-radius:8px'});
+    line.textContent=('Le texte est minuscule et très long, fais défiler vers la droite pour trouver le bouton. ').repeat(120);
+    const end=h('button',{class:'sm',style:'margin-left:12px',onclick:nx},'SUIVANT');line.append(end);
+    card('🔬 Lecture attentive',h('p',{},'Fais défiler horizontalement le texte jusqu\'au bout pour trouver le bouton « suivant ».'),line)},
+  (nx)=>{
+    const fs=$('#fscroll'),thumb=$('i',fs),up=$('#uptop');fs.style.display='block';up.style.display='block';up.onclick=()=>window.scrollBy(0,-10);
+    let H=14000,grown=0,prev=0;const tall=h('div',{class:'tall',style:`height:${H}px`});
+    for(let y=300;y<H;y+=300)tall.append(h('div',{class:'mark',style:`top:${y}px`},y%3000===0?`↓ continue ↓ (${Math.round(y/H*100)} %)`:'· · ·'));
+    const bt=h('button',{class:'big',style:'position:absolute;bottom:20px;left:10%;width:80%'},'Suivant');tall.append(bt);
+    const upd=()=>{const mx=document.documentElement.scrollHeight-innerHeight;const r=mx>0?scrollY/mx:0;thumb.style.top=((1-r)*(fs.clientHeight-40))+'px'};
+    on(window,'wheel',e=>{if(!e.ctrlKey){e.preventDefault();window.scrollBy(0,-e.deltaY)}},{passive:false});
+    on(window,'scroll',()=>{const mx=document.documentElement.scrollHeight-innerHeight;
+      if(mx-scrollY<3000&&scrollY>prev){const d=(scrollY-prev)*.65;window.scrollTo(0,prev+Math.max(2,d))}
+      if(mx-scrollY<120&&grown<4){grown++;H+=1800;tall.style.height=H+'px';toast('Le bas recule…','bad')}
+      prev=scrollY;upd()});
+    bt.onclick=()=>{fs.style.display='none';up.style.display='none';nx()};cleaners.push(()=>{fs.style.display='none';up.style.display='none'});
+    card('📜 Longue page',h('p',{},'Fais défiler la page jusqu\'en bas. (Dans le bon sens.)')); STAGE.append(tall);upd()}];
+  cleaners.push(()=>document.body.classList.remove('noscroll'));
+  seq(fns,()=>{document.body.classList.remove('noscroll');done()})}
+
+/* ---- pages ---- */
+function sPages(done){
+  let n=0;const body=h('div',{});
+  const show=(label)=>{body.innerHTML='';body.append(h('p',{style:'color:var(--ink);font-weight:700;text-align:center'},'Page 1/12'),h('p',{},label||'Contenu de la page. (Il n\'y a rien d\'intéressant.)'))};show();
+  const pg=h('div',{style:'display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0'});
+  const mk=()=>{pg.innerHTML='';for(let i=1;i<=12;i++)pg.append(h('button',{class:'sm',style:'background:var(--line)',onclick:()=>{n++;if(n>=8){pg.innerHTML='';pg.append(h('button',{class:'big',onclick:done},'Terminer (page 12/12)'));show('Page 12/12 : enfin !');return}show(`Tu as cliqué sur la page ${i}, mais voici la page 1.`);fail()}},i))};mk();
+  card('📖 Pagination',h('p',{},'Rends-toi à la dernière page.'),body,pg)}
+
+/* ---- code secret ---- */
+function sCode(done){let t=0;const H=['Indice : c\'est un mot.','Indice : il y a des lettres dedans.','Indice : ce n\'est pas « mot de passe ».','Indice : il fait plus de trois lettres.','Indice : ce n\'est pas ce que tu crois.','Indice : c\'est un code que vous utilisez pour les appels, tous les deux.'];
+  const inp=h('input',{type:'text',placeholder:'Code secret',autocomplete:'off'}),hint=h('p',{style:'color:var(--yellow)'});
+  card('🔐 Code secret',h('p',{},'Entre le code pour déverrouiller le cadeau.'),inp,hint,h('button',{class:'big',onclick:()=>{t++;if(hash(inp.value)===CFG.SECRET_HASH||t>=9)done();else{fail('Code incorrect.');hint.textContent=H[Math.min(t-1,H.length-1)];inp.value=''}}},'Déverrouiller'))}
+
+/* ---- finale ---- */
+function fFake(done){const p=h('h1',{style:'min-height:3em;font-size:1.5rem'});card('🎉',p,h('p',{id:'ff'}));
+  (async()=>{await typeText(p,'Félicitations '+CFG.NAME+', tu as terminé !',false);confetti();await sleep(1800);p.textContent+=' Mais';await sleep(1000);for(let i=0;i<p.textContent.length&&p.textContent.length>3;i++){p.textContent=p.textContent.slice(0,-1);await sleep(40)}
+    p.textContent='Nouvelle épreuve détectée…';await sleep(1600);const b=h('button',{class:'big',style:'background:var(--red);color:#fff'},'Hein ?!');b.onclick=done;STAGE.firstChild.append(b)})()}
+function fCert(done){card('🎖 Diplôme',h('div',{class:'cert'},h('div',{style:'font-size:2.4rem'},'🏅'),h('h1',{},'Certificat de patience niveau 3'),h('p',{style:'color:var(--ink)'},'décerné à '+CFG.FULL),h('p',{},'pour avoir survécu à des cookies, des captchas, des barres de chargement et Tess.')),h('button',{class:'big',onclick:done},'Merci'))}
+function fRank(done){const rows=[['1','Mamie Paulette','00:07'],['2','Un chat','00:11'],['3','Gérard (le hamster)','00:19'],['4','Tess (bot)','00:21'],['5',CFG.FULL,fmt(Date.now()-ST.start)]];
+  card('🏆 Classement général',h('table',{class:'lb'},...rows.map(r=>h('tr',{style:r[0]==='5'?'color:var(--yellow);font-weight:700':''},h('td',{},r[0]),h('td',{},r[1]),h('td',{},r[2])))),h('p',{},'Tu es dernier. Mais c\'est officiel.'),h('button',{class:'big',onclick:done},'Je conteste'))}
+function fMail(done){let n=0;const msg=h('p',{});card('📧 Confirmation',h('p',{},'Un e-mail de confirmation vous a été envoyé. (Il est en route.)'),msg,h('button',{class:'big',onclick:()=>{n++;n>=4?done():(msg.textContent=`Aucun nouveau message. (Vérification ${n}/4)`,fail())}},'Vérifier ma boîte mail'))}
+function fPact(done){let d=0;const items=["J'accepte de céder mon âme","J'accepte de céder mon canapé","J'accepte de céder mes week-ends"].map(t=>{const c=h('input',{type:'checkbox'});return [c,h('label',{class:'row',style:'font-size:.95rem;color:var(--ink)'},c,' '+t)]});
+  const sign=h('button',{class:'big',style:'background:var(--red);color:#fff;transition:transform .2s'},'✍ Signer de mon sang');
+  const mv=()=>{if(d<3){d++;sign.style.transform=`translate(${ri(-90,90)}px,${ri(-50,50)}px)`}else sign.style.transform=''};
+  sign.addEventListener('mouseenter',mv);sign.addEventListener('touchstart',e=>{if(d<3){e.preventDefault();mv()}},{passive:false});
+  sign.onclick=()=>{if(!items.every(i=>i[0].checked))return fail('Il faut cocher les 3 cases, c\'est la loi infernale.');if(d<3)return mv();done()};
+  card('📜 Pacte final',h('p',{},'Je soussigné '+CFG.FULL+', sain d\'esprit (discutable), reconnais ce qui suit :'),...items.map(i=>i[1]),sign)}
+function fReal(){document.body.classList.add('calm');document.documentElement.style.setProperty('--heat',0);setTimeout(()=>mSay('Bon… je range les cornes. Joyeux anniversaire, '+CFG.NAME+' ❤️',9000),4000);
+  const msg=decodeURIComponent(escape(atob(CFG.FINAL_B64)));
+  const stats=[['Échecs',ST.fails],['Triches détectées',ST.cheats],['Succès débloqués',ST.ach.size],['Temps perdu',fmt(Date.now()-ST.start)]];
+  const p=h('p',{style:'color:var(--ink);font-size:1rem;text-align:left;white-space:pre-wrap;min-height:5em'});
+  card('Joyeux anniversaire '+CFG.FULL+' ! 🎂 '+CFG.AGE+' ans',h('div',{class:'gift'},'🎁'),p,h('div',{class:'stats'},...stats.map(s=>h('div',{},s[0],h('b',{},String(s[1]))))),
+    h('button',{class:'big',onclick:()=>{toast('Niveau 2 débloqué… rendez-vous l\'an prochain 😈','gold',6000);confetti()}},'⭐ Passer au niveau supérieur'));
+  confetti();typeText(p,msg,false,true);try{localStorage.removeItem('tb_idx')}catch(e){}}
+
+const STAGES=[sIntro,sCookies,sPopups,sCGU,sBirth,sForm,sCaptchas,sQuiz,sGames,sWait,sGauntlet,sScroll,sPages,sCode,fFake,fCert,fRank,fMail,fPact,fReal];
+const WHISP=["Bienvenue. Entre, entre. Ne regarde pas derrière toi.","Les cookies, c'est comme mes contrats : on les accepte sans lire.","Quelques formalités. Je te promets : rien de grave. (Si.)","Lis tout. J'ai mis un piège à la page 7.","Dis ton âge. Je saurai si tu mens. Je sais tout.","Un joli formulaire. J'adore les formulaires.","Prouve que tu es humain. Moi, j'ai arrêté.","Un quiz ! Je les aime truqués.","Des jeux. Tu perdras. C'est un classique.","Patience… c'est ma spécialité. Et pas la tienne.","Des boutons. Des boutons qui fuient. C'est moi qui les pousse.","Défile. Défile encore. Je te regarde de bas en haut.","Page 1 sur 12. Ou pas.","Le code secret : ton dernier espoir. Spoiler : tu l'as.","Tu as presque fini. Presque. J'adore ce mot.","Un diplôme ! Signé de ma main griffue.","Dernier de la classe. Comme à la maternelle.","Un mail. Un mail qui n'arrive pas.","Un dernier petit pacte. Pour la forme.",""];
+function save(){try{localStorage.setItem('tb_idx',String(idx))}catch(e){}}
+function load(i){cleaners.forEach(f=>f());cleaners=[];document.body.classList.remove('fc','noscroll');document.querySelectorAll('.ov').forEach(o=>o.remove());idx=i;save();STAGE.innerHTML='';window.scrollTo(0,0);crumb();lbl();if(i>0&&i<STAGES.length-1&&Math.random()<.6)setTimeout(()=>mReact('stage'),900);if(WHISP[i]&&i<STAGES.length-1)setTimeout(()=>toast('😈 « '+WHISP[i]+' »','devil',6500),600);if(i>2&&i<STAGES.length-3&&Math.random()<.25)setTimeout(()=>{if(!document.querySelector('.ov'))surveyRound(0)},2500);
+  STAGES[i](once(()=>{if(i<STAGES.length-1){toast(pick(['Ne ferme pas cette page.','Ne ferme pas cette page. Je le saurai.','Tu ne peux plus fermer cette page. Ton âme est dessus.']));load(i+1)}}))}
+let start=0;try{start=+localStorage.getItem('tb_idx')||0}catch(e){}
+const dm=location.hash.match(/^#debug-(\d+)$/);if(dm)start=Math.min(+dm[1],STAGES.length-1);
+if(start>0&&start<STAGES.length-1)toast('Progression restaurée à l\'étape '+(start+1)+'.');
+load(start);
+})();
+</script>
+</body>
+</html>
